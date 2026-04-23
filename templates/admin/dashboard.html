@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - Football News{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 style="color: #1e3a8a;">
+                <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+            </h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="/admin/post" class="btn btn-success">
+                <i class="fas fa-plus"></i> New Article
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center" style="border-top: 4px solid #1e3a8a;">
+                <div class="card-body">
+                    <h5 class="card-title">Total Articles</h5>
+                    <h2 style="color: #1e3a8a;">{{ articles|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center" style="border-top: 4px solid #f97316;">
+                <div class="card-body">
+                    <h5 class="card-title">Total Comments</h5>
+                    <h2 style="color: #f97316;">{{ comments|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center" style="border-top: 4px solid #10b981;">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <h2 style="color: #10b981;">{{ users|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center" style="border-top: 4px solid #8b5cf6;">
+                <div class="card-body">
+                    <h5 class="card-title">Categories</h5>
+                    <h2 style="color: #8b5cf6;">{{ categories|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="articles-tab" data-bs-toggle="tab" data-bs-target="#articles" type="button">
+                <i class="fas fa-newspaper"></i> Articles
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories" type="button">
+                <i class="fas fa-list"></i> Categories
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="comments-tab" data-bs-toggle="tab" data-bs-target="#comments" type="button">
+                <i class="fas fa-comments"></i> Comments
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button">
+                <i class="fas fa-users"></i> Users
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- Articles Tab -->
+        <div class="tab-pane fade show active" id="articles">
+            {% if articles %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Category</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for article in articles %}
+                                <tr>
+                                    <td>
+                                        <a href="/article/{{ article.id }}" target="_blank">{{ article.title }}</a>
+                                    </td>
+                                    <td>{{ article.author.username }}</td>
+                                    <td><span class="badge badge-category">{{ article.category.name }}</span></td>
+                                    <td><small>{{ article.created_at.strftime('%Y-%m-%d') }}</small></td>
+                                    <td>
+                                        <a href="/admin/edit/{{ article.id }}" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="POST" action="/admin/delete/{{ article.id }}" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this article?');">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">No articles yet.</div>
+            {% endif %}
+        </div>
+
+        <!-- Categories Tab -->
+        <div class="tab-pane fade" id="categories">
+            <div class="mb-4">
+                <h5>Add New Category</h5>
+                <form method="POST" action="/admin/category" class="row g-2">
+                    <div class="col-md-6">
+                        <input type="text" name="name" class="form-control" placeholder="Category name" required>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="submit" class="btn btn-primary w-100">Add Category</button>
+                    </div>
+                </form>
+            </div>
+
+            {% if categories %}
+                <div class="row">
+                    {% for category in categories %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ category.name }}</h5>
+                                    <p class="card-text"><small>{{ category.articles|length }} articles</small></p>
+                                    <form method="POST" action="/admin/delete-category/{{ category.id }}" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this category?');">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">No categories yet.</div>
+            {% endif %}
+        </div>
+
+        <!-- Comments Tab -->
+        <div class="tab-pane fade" id="comments">
+            {% if comments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Author</th>
+                                <th>Article</th>
+                                <th>Comment</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for comment in comments %}
+                                <tr>
+                                    <td>{{ comment.author.username }}</td>
+                                    <td>
+                                        <a href="/article/{{ comment.article.id }}" target="_blank">{{ comment.article.title }}</a>
+                                    </td>
+                                    <td>{{ comment.content[:50] }}...</td>
+                                    <td><small>{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</small></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">No comments yet.</div>
+            {% endif %}
+        </div>
+
+        <!-- Users Tab -->
+        <div class="tab-pane fade" id="users">
+            {% if users %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Articles</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        {% if user.is_admin %}
+                                            <span class="badge bg-danger">Admin</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">User</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user.articles|length }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">No users yet.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
